@@ -1,6 +1,6 @@
 # Greenlight
 
-## the go.mod file
+## The go.mod file
 
 the `go.mod` file defines a module path, which is an identifier that will be used
 as the root import path for your packages. It's a good practice to make the
@@ -40,3 +40,21 @@ interpolated parameters.
 
 So we'll going to integrate the `httprouter` package with our application. If
 you're building a REST API for public consumption, then it is a solid choice.
+
+## Databases
+
+### Restart the database
+```
+$ sudo service postgresql restart
+```
+
+### Metadata
+```
+database: 'greenlight'
+password: 'pa55word'
+```
+
+### Driver
+```
+data source name (DNS): 'postgres://greenlight:pa55word@localhost/greenlight'
+```

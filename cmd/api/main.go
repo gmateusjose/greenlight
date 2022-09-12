@@ -1,12 +1,17 @@
 package main
 
 import (
+	"context"
+	"database/sql"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 // Declare a string containing the application version number. Later in the
@@ -23,6 +28,9 @@ const version = "1.0.0"
 type config struct {
 	port int
 	env  string
+	db   struct {
+		dsn string
+	}
 }
 
 // Define an application struct to hold the dependencies for our HTTP handlers,
@@ -38,16 +46,31 @@ func main() {
 	// Declare an instance of the config struct
 	var cfg config
 
+	// Initialize a new logger which writes messages to the standard out stream,
+	// prefixed with the current date and time.
+	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+
+	// Getting .env variables
+	err := godotenv.Load("config.env")
+	if err != nil {
+		logger.Fatal("Error loading .env file")
+	}
+
 	// Read the value of the port and env command-line flags into the config
 	// struct. We default to using the port number 4000 and the environment
 	// "development" if no corresponding flags are provided.
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("GREENLIGHT_DB_DSN"), "PostgreSQL DSN")
 	flag.Parse()
 
-	// Initialize a new logger which writes messages to the standard out stream,
-	// prefixed with the current date and time.
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	db, err := openDB(cfg)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	defer db.Close()
+	logger.Printf("database connection pool established")
 
 	// Declare an instance of the application struct, containing the config
 	// struct and the logger.
@@ -69,6 +92,24 @@ func main() {
 
 	// Start the HTTP server
 	logger.Printf("starting %s server on %s", cfg.env, srv.Addr)
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 	logger.Fatal(err)
+}
+
+// The openDB() function returns a sql.DB connection pool
+func openDB(cfg config) (*sql.DB, error) {
+	db, err := sql.Open("postgres", cfg.db.dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err = db.PingContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }
