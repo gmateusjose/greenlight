@@ -58,3 +58,17 @@ password: 'pa55word'
 ```
 data source name (DNS): 'postgres://greenlight:pa55word@localhost/greenlight'
 ```
+
+### Migrations
+
+Using migration tool: [migrate CLI](https://github.com/golang-migrate/migrate)
+
+Create pair of migration files
+```
+migrate create -seq -ext=.sql -dir=./migrations $migration-name
+```
+
+Execute migrations
+```
+migrate -path=./migrations -database=$database-dsn up
+```
