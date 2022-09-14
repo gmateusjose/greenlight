@@ -12,6 +12,7 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"greenlight.mateussilva/internal/data"
 )
 
 // Declare a string containing the application version number. Later in the
@@ -43,6 +44,7 @@ type config struct {
 type application struct {
 	config config
 	logger *log.Logger
+	models data.Models
 }
 
 func main() {
@@ -83,6 +85,7 @@ func main() {
 	app := &application{
 		config: cfg,
 		logger: logger,
+		models: data.NewModels(db),
 	}
 
 	// Declare a HTTP server with some sensible timeout settings, which listens
