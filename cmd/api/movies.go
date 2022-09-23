@@ -39,7 +39,7 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 
 	err = app.models.Movies.Insert(movie)
 	if err != nil {
-		app.logger.Print(err)
+		app.logger.PrintError(err, nil)
 		app.serverErrorResponse(w, r, err)
 		return
 	}
