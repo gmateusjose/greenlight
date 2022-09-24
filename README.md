@@ -72,3 +72,9 @@ Execute migrations
 ```
 migrate -path=./migrations -database=$database-dsn up
 ```
+
+# TO FIX
+
+```
+http: error: ConnectionError: HTTPConnectionPool(host='localhost', port=4000): Max retries exceeded with url: /v1/movies (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7fcd8eda3100>: Failed to establish a new connection: [Errno 111] Connection refused')) while doing GET request to URL: http://localhost:4000/v1/movies
+```
